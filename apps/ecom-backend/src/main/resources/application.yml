@@ -1,0 +1,111 @@
+
+# port server
+server:
+  port: 8080
+
+# spring configurations
+spring:
+  application:
+    name: Ecommerce Backend
+
+  # enable virtual threads
+  threads:
+    virtual:
+      enabled: true
+
+  # configurations for database.
+  datasource:
+    hikari:
+      poolName: Hikari
+      auto-commit: false # better transaction control. explicitly control @transactional
+    driver-class-name: org.postgresql.Driver #option (postgresql dependency)
+    type: com.zaxxer.hikari.HikariDataSource #option (by default)
+    data:
+      jpa:
+        repositories:
+          bootstrap-mode: deferred # avoids blocking startup time. (after ApplicationContext is refreshed)
+    jpa:
+      properties:
+        hibernate:
+          jdbc:
+            time_zone: UTC
+            batch_size: 25 # batch insert/update ( better performance)
+          order_updates: true # better batching
+          order_inserts: true # better batching
+          query:
+            # pagination in a query that eager-fetches a collection, @OneToMany. Hibernate will throw an error.
+            fail_on_pagination_over_collection_fetch: true
+            # improve SQL query plan caching by padding IN clause parameters to a fixed size.
+            in_clause_parameter_padding: true
+          generate_statistics: false # Disables Hibernate’s internal performance metrics collection
+          connection:
+            provider_disables_autocommit: true # explicitly control, @transactional
+          default_schema: ecommerce # schema for all tables.
+      hibernate:
+        ddl-auto: validate # validate the schema against the DB on startup but won't modify it.
+        naming:
+          implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy #option
+          physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy #option
+      open-in-view: false # forces to load all data in the service layer. (controller and view should never hit the DB)
+
+  #Liguibase configurations
+  liquibase:
+    change-log: classpath:db/changelog/master.xml
+    default-schema: ecommerce
+    contexts: dev
+    # drop-first: true
+
+  # devtools configurations
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+
+  # limit servlet multipart size (file - image)
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  # OAuth2 configurations - kinde
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://hainguyenkinde.kinde.com # jwt claim need match iss claim.
+          jwk-set-uri: https://hainguyenkinde.kinde.com/.well-known/jwks # fetch public keys to verify signature JWT.
+          audiences: http://localhost:8080/api # jwt claim need match audience.
+
+# Logging level
+logging:
+  level:
+    ROOT: INFO
+    org.hibernate.SQL: INFO
+    com.hainguyen.ecom: INFO
+
+# general application config (client, cors, kinde, stripe)
+application:
+  # client front end
+  client-base-url: http://localhost:4200
+  #cors (Cross Origin Resource Sharing)
+  cors:
+    allowed-origins: http://localhost:4200
+    allowed-methods: "*"
+    allowed-headers: "*"
+    exposed-headers: "*"
+    allow-credentials: false # browser will not send credentials, cookie,HTTP basic auth. Client have to send manually
+    max-age: 300
+
+  # kinde configurations
+  kinde:
+    api: https://hainguyenkinde.kinde.com # Kinde tenant’s authorization server.
+    client-id: ${KINDE_CLIENT_ID}
+    client-secret: ${KINDE_CLIENT_SECRET}
+    audience: https://hainguyenkinde.kinde.com/api # Ecom-backend only accept access token from "Kinde Management API"
+
+  # stripe
+  stripe:
+    api-key: ${STRIPE_API_KEY} # secret key, only in Backend. ( front-end publishable-key)
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET} # webhook signing secret (register stripe account for this application, local environment)

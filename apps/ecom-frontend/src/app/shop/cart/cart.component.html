@@ -1,0 +1,98 @@
+<div class="text-2xl mb-2">Shopping cart</div>
+<div class="flex flex-col lg:flex-row">
+  <!-- CARTITEMS -->
+  <div class="flex-grow me-5 w-full">
+    @if(cartQuery.isSuccess() && cart!.length !==0){ @for(cartItem of cart!;
+    track cartItem.publicId){
+    <div class="border-t border-gray-200"></div>
+
+    <div class="flex items-center justify-between">
+      <div class="p-4 flex">
+        <img
+          [src]="
+            'data:' +
+            cartItem.picture.mimeType +
+            ';base64,' +
+            cartItem.picture.file
+          "
+          alt="{{ cartItem.name }}"
+          width="110px"
+          class="max-w-full lg:max-w-none me-5"
+        />
+
+        <div class="w-40">
+          <a [routerLink]="['/product', cartItem.publicId]">
+            {{ cartItem.name }}</a
+          >
+          <div class="text-sm">{{ cartItem.brand }}</div>
+          <div class="font-bold">{{ cartItem.price | currency }}</div>
+        </div>
+
+        <div class="flex items-center">
+          <div class="w-32 flex justify-around items-center">
+            <button
+              class="btn btn-outline btn-primary btn-sm"
+              (click)="
+                removeQuantityToCart(cartItem.publicId, cartItem.quantity)
+              "
+            >
+              -
+            </button>
+            <div class="">{{ cartItem.quantity }}</div>
+            <button
+              class="btn btn-outline btn-primary btn-sm"
+              (click)="addQuantityToCart(cartItem.publicId)"
+            >
+              +
+            </button>
+          </div>
+
+          <button
+            class="ms-5 btn btn-error btn-outline"
+            (click)="removeItem(cartItem.publicId)"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+    } } @else if(cartQuery.isPending()) {
+    <div class="flex justify-center">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+    } @else if (cartQuery.isSuccess() && this.cart.length ===0) {
+    <div class="flex flex-col items-center justify-center h-60">
+      <div class="font-bold text-2xl">No items in cart</div>
+      <div class="">Add some items to your cart</div>
+    </div>
+    }
+  </div>
+  <!-- // CARTITEMS -->
+  <!-- ORDER SUMMARY -->
+  <div
+    class="bg-gray-100 border-gray-400 p-5 w-full lg:w-96 h-72 mt-6 lg:mt-0 rounded-md"
+  >
+    <div class="font-bold">Order Summary</div>
+    <div class="border-t border-gray-300 my-5"></div>
+    <div class="flex justify-between">
+      <div>Delivery</div>
+      <div>{{ 0 | currency }}</div>
+    </div>
+    <div class="border-t border-gray-300 my-5"></div>
+    <div class="flex justify-between font-bold">
+      <div>Total</div>
+      <div>{{ computeTotal() | currency }}</div>
+    </div>
+    <div class="border-t border-gray-300 my-5"></div>
+    <button
+      class="btn btn-primary w-full"
+      [disabled]="
+        cartQuery.isSuccess() && cartQuery.data()!.products.length === 0
+      "
+      (click)="checkout()"
+    >
+      {{ labelCheckout }}
+    </button>
+  </div>
+  <!-- // ORDER SUMMARY -->
+</div>

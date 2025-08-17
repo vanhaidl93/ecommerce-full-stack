@@ -44,3 +44,10 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 .angular
+
+# ecom-backend
+target/
+build/
+out/
+volumes
+.env

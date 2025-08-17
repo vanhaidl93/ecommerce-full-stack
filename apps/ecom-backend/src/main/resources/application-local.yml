@@ -1,0 +1,14 @@
+logging:
+  level:
+    ROOT: INFO
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: TRACE
+    com.hainguyen.ecom: DEBUG
+    org.apache.hc.client5.http: INFO # HTTP client logs for outgoing requests, Apache HttpClient 5.
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
